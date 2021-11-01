@@ -3,7 +3,8 @@ export const getNumberOfTabs = (line: string) => {
 };
 
 export const treeStringToJson = (tree: string) => {
-  const elements: {} = {};
+  type Element = Record<string, any>;
+  const elements: { [key: string]: Element } = {};
   let prevLine = "";
   const path: Array<string> = [];
 
@@ -36,7 +37,7 @@ export const treeStringToJson = (tree: string) => {
         curr = {}
     */
     const current: any = path.reduce(
-      (branch: { [key: string]: {} }, filename: string) => branch[filename],
+      (branch: { [key: string]: Element }, filename: string) => branch[filename],
       elements
     );
 

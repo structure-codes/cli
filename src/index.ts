@@ -9,9 +9,11 @@ program
   .option("-t, --target-dir <targetDir>", "target directory to build structure in", ".");
 
 program.parse(process.argv);
-const { file, targetDir } = program.opts();
+const opts = program.opts();
+const file = opts.file;
+const targetDir = opts.targetDir + "/";
 
-const dirExists = (filepath: string) => {
+const pathExists = (filepath: string) => {
   try {
     fs.accessSync(filepath);
     return true;
@@ -49,24 +51,31 @@ try {
   const data = fs.readFileSync(file);
   const tree = treeStringToJson(data.toString());
   const paths = getPaths(tree);
-  const targetDirExists = dirExists(targetDir);
+  const targetDirExists = pathExists(targetDir);
   if (!targetDirExists) {
+    console.log("Creating target directory:", targetDir);
     fs.mkdirSync(targetDir, { recursive: true });
   }
-  paths.forEach(async ({ filepath, type }: any) => {
+  paths.forEach(({ filepath, type }: any) => {
+    const fullPath = targetDir + filepath.replace(/\/+/g, "/");
+    if (pathExists(fullPath)) {
+      console.warn("Path already exists:", fullPath);
+      return;
+    }
     if (type === "dir") {
-      await fs.mkdirSync(targetDir + "/" + filepath, { recursive: true });
+      console.log("Creating directory:", fullPath);
+      fs.mkdirSync(fullPath, { recursive: true });
     } else {
-      const dirname = path.dirname(filepath);
-      const exist = await dirExists(dirname);
+      const dirname = path.dirname(fullPath);
+      const exist = pathExists(dirname);
       if (!exist) {
-        await fs.mkdirSync(targetDir + "/" + dirname, { recursive: true });
+        console.log("Creating directory:", dirname);
+        fs.mkdirSync(dirname, { recursive: true });
       }
-      await fs.writeFileSync(targetDir + "/" + filepath, "");
+      console.log("Creating file:", fullPath);
+      fs.writeFileSync(fullPath, "", {flag: "wx"});
     }
   });
-  console.log(tree);
-  console.log(paths);
 } catch (e: any) {
   console.error(e.message);
 }
