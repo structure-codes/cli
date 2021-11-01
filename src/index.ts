@@ -1,15 +1,19 @@
-// import inquirer from "inquirer";
 import * as fs from "fs";
 import path from "path";
 import { treeStringToJson } from "./tree";
+import { Command } from "commander";
 
-const args = process.argv.slice(2);
-const file = args[0];
-const targetDir = (args[1] || "") + "/";
+const program = new Command();
+program
+  .requiredOption("-f, --file <file>", ".tree file to build structure from")
+  .option("-t, --target-dir <targetDir>", "target directory to build structure in", ".");
 
-const dirExists = async (filepath: string) => {
+program.parse(process.argv);
+const { file, targetDir } = program.opts();
+
+const dirExists = (filepath: string) => {
   try {
-    await fs.accessSync(filepath);
+    fs.accessSync(filepath);
     return true;
   } catch {
     return false;
@@ -17,7 +21,11 @@ const dirExists = async (filepath: string) => {
 };
 
 const getPaths = (tree: any) => {
-  const paths: Array<{}> = [];
+  type Path = {
+    filepath: string,
+    type: 'file' | 'dir',
+  }
+  const paths: Array<Path> = [];
   const searchTree = (tree: any, filepath: Array<string>) => {
     const branches = Object.keys(tree);
     if (branches.length === 0) {
@@ -36,30 +44,29 @@ const getPaths = (tree: any) => {
   searchTree(tree, []);
   return paths;
 };
-(async () => {
-  try {
-    const data = fs.readFileSync(file);
-    const tree = treeStringToJson(data.toString());
-    const paths = getPaths(tree);
-    const targetDirExists = await dirExists(targetDir);
-    if (!targetDirExists) {
-      await fs.mkdirSync(targetDir, { recursive: true });
-    }
-    paths.forEach(async ({ filepath, type }: any) => {
-      if (type === "dir") {
-        await fs.mkdirSync(targetDir + filepath, { recursive: true });
-      } else {
-        const dirname = path.dirname(filepath);
-        const exist = await dirExists(dirname);
-        if (!exist) {
-          await fs.mkdirSync(targetDir + dirname, {recursive: true});
-        }
-        await fs.writeFileSync(targetDir + filepath, "");
-      }
-    });
-    console.log(tree);
-    console.log(paths);
-  } catch (e: any) {
-    console.error(e.message);
+
+try {
+  const data = fs.readFileSync(file);
+  const tree = treeStringToJson(data.toString());
+  const paths = getPaths(tree);
+  const targetDirExists = dirExists(targetDir);
+  if (!targetDirExists) {
+    fs.mkdirSync(targetDir, { recursive: true });
   }
-})();
+  paths.forEach(async ({ filepath, type }: any) => {
+    if (type === "dir") {
+      await fs.mkdirSync(targetDir + "/" + filepath, { recursive: true });
+    } else {
+      const dirname = path.dirname(filepath);
+      const exist = await dirExists(dirname);
+      if (!exist) {
+        await fs.mkdirSync(targetDir + "/" + dirname, { recursive: true });
+      }
+      await fs.writeFileSync(targetDir + "/" + filepath, "");
+    }
+  });
+  console.log(tree);
+  console.log(paths);
+} catch (e: any) {
+  console.error(e.message);
+}
