@@ -1,81 +1,35 @@
-import * as fs from "fs";
-import path from "path";
-import { treeStringToJson } from "./tree";
+#!/usr/bin/node
+
 import { Command } from "commander";
+import { buildStructure } from "./buildStructure";
+import { generateTree } from "./generateTree";
+import path from "path";
 
 const program = new Command();
+// tree cli does 2 things
+// - Generate .tree file from existing directory structure
+// - Use .tree file to build directory structure
+
+// result is a .tree file
 program
-  .requiredOption("-f, --file <file>", ".tree file to build structure from")
-  .option("-t, --target-dir <targetDir>", "target directory to build structure in", ".");
+  .command("gen")
+  .argument("[directory]", "directory to build structure from", ".")
+  .option("-o, --output-file <outputFile>", "file to put tree structure in")
+  .option("-j, --json", "print tree in json format")
+  .option("-s, --silent", "do not print anything to the console")
+  .action((directory, options) => {
+    generateTree(directory, options);
+  });
+
+// result is newly created dirs
+program
+  .command("build")
+  .argument("<file>", ".tree file to build structure from")
+  .option("-o, --output-dir <outputDir>", "output directory to build structure in", ".")
+  .action((file, { outputDir }) => {
+    buildStructure(file, outputDir);
+  });
 
 program.parse(process.argv);
-const opts = program.opts();
-const file = opts.file;
-const targetDir = opts.targetDir + "/";
 
-const pathExists = (filepath: string) => {
-  try {
-    fs.accessSync(filepath);
-    return true;
-  } catch {
-    return false;
-  }
-};
 
-const getPaths = (tree: any) => {
-  type Path = {
-    filepath: string,
-    type: 'file' | 'dir',
-  }
-  const paths: Array<Path> = [];
-  const searchTree = (tree: any, filepath: Array<string>) => {
-    const branches = Object.keys(tree);
-    if (branches.length === 0) {
-      const leafName = filepath[filepath.length - 1];
-      const type = leafName.includes(".") ? "file" : "dir";
-      const currentPath = filepath.join("/");
-
-      return paths.push({ filepath: currentPath, type });
-    }
-    branches.forEach((branch) => {
-      const newPath = [...filepath];
-      newPath.push(branch);
-      searchTree(tree[branch], newPath);
-    });
-  };
-  searchTree(tree, []);
-  return paths;
-};
-
-try {
-  const data = fs.readFileSync(file);
-  const tree = treeStringToJson(data.toString());
-  const paths = getPaths(tree);
-  const targetDirExists = pathExists(targetDir);
-  if (!targetDirExists) {
-    console.log("Creating target directory:", targetDir);
-    fs.mkdirSync(targetDir, { recursive: true });
-  }
-  paths.forEach(({ filepath, type }: any) => {
-    const fullPath = targetDir + filepath.replace(/\/+/g, "/");
-    if (pathExists(fullPath)) {
-      console.warn("Path already exists:", fullPath);
-      return;
-    }
-    if (type === "dir") {
-      console.log("Creating directory:", fullPath);
-      fs.mkdirSync(fullPath, { recursive: true });
-    } else {
-      const dirname = path.dirname(fullPath);
-      const exist = pathExists(dirname);
-      if (!exist) {
-        console.log("Creating directory:", dirname);
-        fs.mkdirSync(dirname, { recursive: true });
-      }
-      console.log("Creating file:", fullPath);
-      fs.writeFileSync(fullPath, "", {flag: "wx"});
-    }
-  });
-} catch (e: any) {
-  console.error(e.message);
-}

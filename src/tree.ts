@@ -1,3 +1,7 @@
+const TRUNK = "│";
+const BRANCH = "├──";
+const LAST_BRANCH = "└──";
+
 export const getNumberOfTabs = (line: string) => {
   return (line.match(/\t/g) || []).length;
 };
@@ -46,4 +50,42 @@ export const treeStringToJson = (tree: string) => {
     path.push(filename);
   });
   return elements;
+};
+
+// not sure we need this but maybe
+export const isValidTreeString = (tree: string) => {
+  const isValidTreeRegex = /^(│?(\t+)?(│|├──|└──|\t)+.+)|#.+|^\s+$/;
+  const lines = tree.split(/\r?\n/);
+  const invalidLine = lines.find(line => !line.match(isValidTreeRegex));
+  if (invalidLine) {
+    console.error("Found invalid line in file:" + invalidLine);
+    return false;
+  }
+  return true;
+};
+
+const getBranchPrefix = (depth: boolean[], isLastBranch: boolean) => {
+  let base = "";
+  const tab = "  ";
+  depth.forEach(isLastBranch => (base = base.concat(isLastBranch ? tab : `${TRUNK}${tab}`)));
+  if (isLastBranch) return base + LAST_BRANCH + " ";
+  else return base + BRANCH + " ";
+};
+
+export const treeJsonToString = (tree: any) => {
+  let treeString = "";
+  const parseBranches = (tree: any, depth: boolean[]) => {
+    const branches = Object.entries(tree);
+    branches.forEach(([key, values], index) => {
+      const isLastBranch = index === branches.length - 1;
+      const prefix = getBranchPrefix(depth, isLastBranch);
+      const branchString = prefix + key + "\n";
+      treeString = treeString.concat(branchString);
+      parseBranches(values, [...depth, isLastBranch]);
+    });
+  };
+  parseBranches(tree, []);
+  treeString = treeString.replace(/\n$/, "");
+
+  return treeString;
 };
