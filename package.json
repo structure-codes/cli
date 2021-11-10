@@ -1,14 +1,17 @@
 {
-  "name": "cli",
-  "version": "1.0.0",
+  "name": "@structure-codes/cli",
+  "version": "0.0.1",
   "description": "cli tool for generating directory structure from a .tree file",
   "bin": {
-    "treez": "out/index.js"
+    "struct": "dist/index.js"
   },
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx",
     "build": "tsc",
     "dev": "tsc -watch -p ."
+  },
+  "engines": {
+    "node": ">=12.0.0"
   },
   "repository": {
     "type": "git",
