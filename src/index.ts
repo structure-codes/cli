@@ -1,11 +1,14 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 
 import { Command } from "commander";
 import { buildStructure } from "./buildStructure";
 import { generateTree } from "./generateTree";
-import path from "path";
+// @ts-ignore
+import packageJson from "../package.json";
 
 const program = new Command();
+program.version(packageJson.version, "-v, --version");
+
 // tree cli does 2 things
 // - Generate .tree file from existing directory structure
 // - Use .tree file to build directory structure
