@@ -1,6 +1,6 @@
 {
   "name": "@structure-codes/cli",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "cli tool for generating directory structure from a .tree file",
   "bin": {
     "struct": "dist/index.js"
