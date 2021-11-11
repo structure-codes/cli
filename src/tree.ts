@@ -6,15 +6,35 @@ export const getNumberOfTabs = (line: string) => {
   return (line.match(/\t/g) || []).length;
 };
 
+const EOL_MATCH = /\r?\n/;
+const getTabChar = (text: string): string | null => {
+  // Search for the first child in the tree and extract the tab character from there
+  const treeLines = text.split(EOL_MATCH);
+  const childRegex = /│?(.+)(├──|└──)/;
+  const firstChild = treeLines.find((line) => line.match(childRegex));
+  const match = firstChild?.match(childRegex);
+  return match?.[1] || null;
+};
+
+
 export const treeStringToJson = (tree: string) => {
   type Element = Record<string, any>;
   const elements: { [key: string]: Element } = {};
   let prevLine = "";
   const path: Array<string> = [];
+  
+  const tabChar = getTabChar(tree);
+  if (!tabChar) {
+    console.error("Unable to parse tab character");
+    return {};
+  }
+
+  // replace whatever tabChar is used with \t in memory to make parsing easier
+  const treeFormatted = tree.replace(new RegExp(tabChar, "g"), "\t");
 
   // look for line breaks that works on all platforms
-  tree.split(/\r|\r\n|\n/).forEach((line, index) => {
-    if (line.startsWith("#")) return;
+  treeFormatted.split(/\r?\n/).forEach((line, index) => {
+    if (line.startsWith("//")) return;
     const prevPrefix = prevLine.split(" ")[0];
     const prevNumTabs = getNumberOfTabs(prevPrefix);
     const prefix = line.split(" ")[0];

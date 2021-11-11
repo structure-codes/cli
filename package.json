@@ -17,8 +17,7 @@
     "type": "git",
     "url": "git+https://github.com/structure-codes/cli.git"
   },
-  "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/structure-codes/cli/issues"
   },

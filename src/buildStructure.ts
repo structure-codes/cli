@@ -39,18 +39,19 @@ const getPaths = (tree: any) => {
   return paths;
 };
 
-export const buildStructure = (file, outputDir) => {
+export const buildStructure = (file, options) => {
+  const { directory } = options;
   try {
     const data = fs.readFileSync(file);
     const tree = treeStringToJson(data.toString());
     const paths = getPaths(tree);
-    const outputDirExists = pathExists(outputDir);
+    const outputDirExists = pathExists(directory);
     if (!outputDirExists) {
-      console.log("Creating target directory:", outputDir);
-      fs.mkdirSync(outputDir, { recursive: true });
+      console.log("Creating target directory:", directory);
+      fs.mkdirSync(directory, { recursive: true });
     }
     paths.forEach(({ filepath, type }: any) => {
-      const fullPath = outputDir + "/" + filepath.replace(/\/+/g, "/");
+      const fullPath = directory + "/" + filepath.replace(/\/+/g, "/");
       if (pathExists(fullPath)) {
         console.warn("Path already exists:", fullPath);
         return;

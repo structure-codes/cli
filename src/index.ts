@@ -10,13 +10,20 @@ const program = new Command();
 program.version(packageJson.version, "-v, --version");
 
 // tree cli does 2 things
-// - Generate .tree file from existing directory structure
+// - Generate structure or .tree file from existing directory structure
 // - Use .tree file to build directory structure
 
-// result is a .tree file
+const collect = (value, previous) => {
+  return previous.concat([value]);
+};
+
 program
   .argument("[directory]", "directory to build structure from", ".")
   .option("-o, --output-file <outputFile>", "file to put tree structure in")
+  // TODO: plz fix thx
+  // .option("-d, --depth <depth>", "depth to search within the target directory")
+  .option("-i, --ignore <ignore>", "ignore these patterns", collect, [])
+  .option("-c, --config-ignore", "include patterns that are ignored by config")
   .option("-j, --json", "print tree in json format")
   .option("-e, --editor", "open structure in new vscode window")
   .option("-s, --silent", "do not print anything to the console")
@@ -28,11 +35,18 @@ program
 program
   .command("build")
   .argument("<file>", ".tree file to build structure from")
-  .option("-o, --output-dir <outputDir>", "output directory to build structure in", ".")
-  .action((file, { outputDir }) => {
-    buildStructure(file, outputDir);
+  .option("-d, --directory <directory>", "output directory to build structure in", ".")
+  .action((file, options) => {
+    buildStructure(file, options);
   });
 
+program.addHelpText('afterAll', `
+Examples:
+  Output tree ignoring dist to file new.tree
+  $ struct -i dist -o new.tree
+  
+  Build structure from src.tree in directory new-project
+  $ struct build ./src.tree -o new-project
+`);
+
 program.parse(process.argv);
-
-
