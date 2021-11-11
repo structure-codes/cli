@@ -2,12 +2,14 @@ import * as fs from "fs";
 import glob from "glob";
 import path from "path";
 import { treeJsonToString } from "./tree";
+import { exec, execSync } from "child_process";
 
 export const generateTree = (directory: string, options) => {
   const {
     silent,
     json,
     outputFile,
+    editor,
   } = options;
   const absolutePath = path.resolve(directory);
   glob(absolutePath + "/**/*", 
@@ -35,14 +37,26 @@ export const generateTree = (directory: string, options) => {
       });
       const treeString = treeJsonToString(tree);
       if (outputFile) {
-        if (!silent) console.log(`Writing data to ${outputFile}`);
+        if (!silent) console.info(`Writing data to ${outputFile}`);
         fs.writeFileSync(outputFile, treeString);
       }
-      if (silent) return;
-      if (json) {
-        console.log(JSON.stringify(tree, null, 2));
-      } else {
-        console.log(treeString);
+      if (!silent && json) {
+        console.info(JSON.stringify(tree, null, 2));
+      } else if (!silent) {
+        console.info(treeString);
+      }
+      // Open generated tree in vscode if the user has it installed
+      if (editor) {
+        try {
+          execSync("code --help");
+        } catch { 
+          return console.warn("Could not find code binary on path.");
+        }
+        const tmpDir = process.platform === "win32" ? process.env.TEMP : "/tmp";
+        const tmpFile = `${path.basename(absolutePath)}_${Date.now()}.tree`;
+        const tmpPath = tmpDir + "/" + tmpFile;
+        fs.writeFileSync(tmpPath, treeString);
+        exec(`code ${tmpPath}`);
       }
     });
 };

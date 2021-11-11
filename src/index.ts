@@ -15,10 +15,10 @@ program.version(packageJson.version, "-v, --version");
 
 // result is a .tree file
 program
-  .command("gen")
   .argument("[directory]", "directory to build structure from", ".")
   .option("-o, --output-file <outputFile>", "file to put tree structure in")
   .option("-j, --json", "print tree in json format")
+  .option("-e, --editor", "open structure in new vscode window")
   .option("-s, --silent", "do not print anything to the console")
   .action((directory, options) => {
     generateTree(directory, options);
