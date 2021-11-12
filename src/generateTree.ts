@@ -1,11 +1,20 @@
 import * as fs from "fs";
 import glob from "glob";
 import path from "path";
+import { execSync } from "child_process";
 import { treeJsonToString } from "./tree";
-import { exec, execSync } from "child_process";
+import { getConfigPath } from "./utils";
+
+const getDefaults = () => {
+  const configPath = getConfigPath();
+  if (!configPath) return [];
+  const config = fs.readFileSync(configPath).toString();
+  return JSON.parse(config);
+};
 
 const globOptions = ({ parentDir, ignored, configIgnore }) => {
-  const defaultIgnore = configIgnore ? [] : ["node_modules", ".git"];
+  const config = getDefaults();
+  const defaultIgnore = configIgnore ? [] : config.ignored;
   const mergedIgnore = [...ignored, ...defaultIgnore].map((path) => `${parentDir}/**/${path}/**`);
   return {
     dot: true,
@@ -63,7 +72,7 @@ export const generateTree = (directory: string, options) => {
         const tmpFile = `${path.basename(absolutePath)}_${Date.now()}.tree`;
         const tmpPath = tmpDir + "/" + tmpFile;
         fs.writeFileSync(tmpPath, treeString);
-        exec(`code ${tmpPath}`);
+        execSync(`code ${tmpPath}`);
       }
     }
   );
