@@ -10,19 +10,23 @@ const globOptions = ({ parentDir, ignored, configIgnore }) => {
   return {
     dot: true,
     ignore: mergedIgnore,
+    strict: false,
   };
 };
 
 export const generateTree = (directory: string, options) => {
   const { silent, json, outputFile, editor, ignore: ignored, configIgnore } = options;
-  const absolutePath = path.resolve(directory);
+  const absolutePath = path.resolve(directory).replace(/\\/g, "/");
 
   glob(
     absolutePath + "/**/*",
     globOptions({ parentDir: absolutePath, ignored, configIgnore }),
     (err, matches) => {
       if (err) {
-        return console.error(`Error searching for files in ${absolutePath}: ${err}`);
+        return console.error(`Error searching for files in ${err.path}`);
+      }
+      if (!matches) {
+        return console.error("No matches found");
       }
       const tree = {};
       matches.forEach((match) => {
