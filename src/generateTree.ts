@@ -3,7 +3,7 @@ import glob from "glob";
 import path from "path";
 import { execSync } from "child_process";
 import { treeJsonToString } from "./tree";
-import { getConfigPath } from "./utils";
+import { getConfigPath, validatePath } from "./utils";
 
 const getDefaults = () => {
   const configPath = getConfigPath();
@@ -24,6 +24,7 @@ const globOptions = ({ parentDir, ignored, configIgnore }) => {
 };
 
 export const generateTree = (directory: string, options) => {
+  if (!validatePath(directory, "dir")) return;
   const { silent, json, outputFile, editor, ignore: ignored, configIgnore } = options;
   const absolutePath = path.resolve(directory).replace(/\\/g, "/");
 

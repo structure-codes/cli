@@ -2,15 +2,7 @@ import * as fs from "fs";
 import path from "path";
 import { treeStringToJson } from "./tree";
 import isNondot from "@structure-codes/is-nondot";
-
-const pathExists = (filepath: string) => {
-  try {
-    fs.accessSync(filepath);
-    return true;
-  } catch {
-    return false;
-  }
-};
+import { pathExists, validatePath } from "./utils";
 
 const getPaths = (tree: any) => {
   type Path = {
@@ -40,22 +32,26 @@ const getPaths = (tree: any) => {
 };
 
 export const buildStructure = (file, options) => {
+  if (!validatePath(file, "file")) return;
   const { directory } = options;
   try {
     const data = fs.readFileSync(file);
     const tree = treeStringToJson(data.toString());
     const paths = getPaths(tree);
-    const outputDirExists = pathExists(directory);
-    if (!outputDirExists) {
+
+    if (!pathExists(directory)) {
       console.log("Creating target directory:", directory);
       fs.mkdirSync(directory, { recursive: true });
     }
+
     paths.forEach(({ filepath, type }: any) => {
       const fullPath = directory + "/" + filepath.replace(/\/+/g, "/");
+
       if (pathExists(fullPath)) {
         console.warn("Path already exists:", fullPath);
         return;
       }
+      
       if (type === "dir") {
         console.log("Creating directory:", fullPath);
         fs.mkdirSync(fullPath, { recursive: true });
