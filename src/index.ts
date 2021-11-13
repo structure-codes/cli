@@ -5,48 +5,55 @@ import { buildStructure } from "./buildStructure";
 import { generateTree } from "./generateTree";
 // @ts-ignore
 import packageJson from "../package.json";
+import { checkConfig } from "./checkConfig";
 
-const program = new Command();
-program.version(packageJson.version, "-v, --version");
 
-// tree cli does 2 things
-// - Generate structure or .tree file from existing directory structure
-// - Use .tree file to build directory structure
-
-const collect = (value, previous) => {
-  return previous.concat([value]);
-};
-
-program
-  .argument("[directory]", "directory to build structure from", ".")
-  .option("-o, --output-file <outputFile>", "file to put tree structure in")
-  // TODO: plz fix thx
-  // .option("-d, --depth <depth>", "depth to search within the target directory")
-  .option("-i, --ignore <ignore>", "ignore these patterns", collect, [])
-  .option("-c, --config-ignore", "include patterns that are ignored by config")
-  .option("-j, --json", "print tree in json format")
-  .option("-e, --editor", "open structure in new vscode window")
-  .option("-s, --silent", "do not print anything to the console")
-  .action((directory, options) => {
-    generateTree(directory, options);
-  });
-
-// result is newly created dirs
-program
-  .command("build")
-  .argument("<file>", ".tree file to build structure from")
-  .option("-d, --directory <directory>", "output directory to build structure in", ".")
-  .action((file, options) => {
-    buildStructure(file, options);
-  });
-
-program.addHelpText('afterAll', `
-Examples:
-  Output tree ignoring dist to file new.tree
-  $ struct -i dist -o new.tree
+(async () => {
+  const program = new Command();
+  program.version(packageJson.version, "-v, --version");
   
-  Build structure from src.tree in directory new-project
-  $ struct build ./src.tree -o new-project
-`);
-
-program.parse(process.argv);
+  // tree cli does 2 things
+  // - Generate structure or .tree file from existing directory structure
+  // - Use .tree file to build directory structure
+  
+  const collect = (value, previous) => {
+    return previous.concat([value]);
+  };
+  
+  // Check if config already exists, if not attempt to create it
+  await checkConfig();
+  
+  program
+    .argument("[directory]", "directory to build structure from", ".")
+    .option("-o, --output-file <outputFile>", "file to put tree structure in")
+    // TODO: plz fix thx
+    // .option("-d, --depth <depth>", "depth to search within the target directory")
+    .option("-i, --ignore <ignore>", "ignore these patterns", collect, [])
+    .option("-c, --config-ignore", "include patterns that are ignored by config")
+    .option("-j, --json", "print tree in json format")
+    .option("-e, --editor", "open structure in new vscode window")
+    .option("-s, --silent", "do not print anything to the console")
+    .action((directory, options) => {
+      generateTree(directory, options);
+    });
+  
+  // result is newly created dirs
+  program
+    .command("build")
+    .argument("<file>", ".tree file to build structure from")
+    .option("-d, --directory <directory>", "output directory to build structure in", ".")
+    .action((file, options) => {
+      buildStructure(file, options);
+    });
+  
+  program.addHelpText('afterAll', `
+  Examples:
+    Output tree ignoring dist to file new.tree
+    $ struct -i dist -o new.tree
+    
+    Build structure from src.tree in directory new-project
+    $ struct build ./src.tree -o new-project
+  `);
+  
+  program.parse(process.argv);
+})();

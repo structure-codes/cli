@@ -3,7 +3,7 @@ import fs from "fs";
 import { execSync } from "child_process";
 import { defaults } from "./defaults";
 import { SettingsType } from "./settingsType";
-import { getConfigPath } from "./utils";
+import { getConfigPath, validatePath } from "./utils";
 
 const defaultSettingsPrompt = {
   type: "list",
@@ -24,8 +24,9 @@ const overwritePrompt = {
   choices: ["Yes", "No"],
 };
 
-const promptSync = async (prompts: any[]): Promise<any> => {
-  return await inquirer.prompt(prompts);
+const configExists = (): boolean => {
+  const configPath = getConfigPath();
+  return validatePath(configPath, "file");
 };
 
 const createConfig = async (settings: SettingsType): Promise<string | null> => {
@@ -62,14 +63,15 @@ const getEditor = () => {
   }
 };
 
-(async () => {
+export const checkConfig = async () => {
+  if (configExists()) return;
   try {
     console.log("Building a tree from certain directories may have slow performance.");
     console.log(`By default, ignore these directories:\n${defaults.ignored.join("\n")}\n`);
-
+  
     const { useDefaultSettings } = await inquirer.prompt([defaultSettingsPrompt]);
     if (useDefaultSettings === "Yes") return createConfig(defaults);
-
+  
     const { editSettings } = await inquirer.prompt([editSettingsPrompt]);
     if (editSettings === "Yes") {
       const configPath = await createConfig(defaults);
@@ -82,8 +84,10 @@ const getEditor = () => {
   } catch (error) {
     if (error.isTtyError) {
       // Prompt couldn't be rendered in the current environment
+      return console.error(error);
     } else {
       // Something else went wrong
+      return console.error(error);
     }
   }
-})();
+};
