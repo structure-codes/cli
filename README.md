@@ -1,20 +1,20 @@
 # struct cli
-`struct` is a tool for generating trees from a user's file system as well as building structures in the file system from an exisiting tree
+`struct` is a tool for generating trees from a user's file system as well as building structures in the file system from an existing tree
 
 Install it with:
 ```
 npm i -g @structure-codes/cli
 ```
 
-### Configuation
-By default, the cli will ignore certain directories which you are unlikely to want to include in tree output. This configuration will be stored in `.treerc` in your home directory (determined by either $HOME or $USERPROFILE). By default, the below directories are ignored:
+### Configuration
+By default, the cli will ignore certain directories which you are unlikely to want to include in tree output. This configuration will be stored in `.treerc` in your home directory (determined by either `$HOME` or `$USERPROFILE`). By default, the below directories are ignored:
 ```
 .git
 node_modules
 ```
 If a `.treerc` file is not found when running the tool, you will be prompted to create one.
 ### Generating structure from a directory
-Running `struct` will output a tree of you current directory by default. You can also specify a path to a target directory and different output options.
+Running `struct` will output a tree from your current directory by default. You can also specify a path to a target directory and different output options.
 ```
 Usage: struct [options] [command] [directory]
 

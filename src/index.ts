@@ -30,6 +30,7 @@ import { checkConfig } from "./checkConfig";
     // .option("-d, --depth <depth>", "depth to search within the target directory")
     .option("-i, --ignore <ignore>", "ignore these patterns", collect, [])
     .option("-c, --config-ignore", "include patterns that are ignored by config")
+    .option("-d, --dir-only", "ignore files in tree output")
     .option("-j, --json", "print tree in json format")
     .option("-e, --editor", "open structure in new vscode window")
     .option("-s, --silent", "do not print anything to the console")

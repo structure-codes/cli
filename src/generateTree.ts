@@ -25,11 +25,11 @@ const globOptions = ({ parentDir, ignored, configIgnore }) => {
 
 export const generateTree = (directory: string, options) => {
   if (!validatePath(directory, "dir")) return;
-  const { silent, json, outputFile, editor, ignore: ignored, configIgnore } = options;
+  const { silent, json, outputFile, editor, ignore: ignored, configIgnore, dirOnly } = options;
   const absolutePath = path.resolve(directory).replace(/\\/g, "/");
-
+  const searchPath = `${absolutePath}/**/*${dirOnly ? "/" : ""}`;
   glob(
-    absolutePath + "/**/*",
+    searchPath,
     globOptions({ parentDir: absolutePath, ignored, configIgnore }),
     (err, matches) => {
       if (err) {
