@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import path from "path";
-import { treeStringToJson } from "./tree";
+import { treeStringToJson } from "@structure-codes/utils";
 import isNondot from "@structure-codes/is-nondot";
 import { pathExists, validatePath } from "./utils";
 
@@ -12,7 +12,8 @@ const getPaths = (tree: any) => {
   const paths: Array<Path> = [];
   const searchTree = (tree: any, filepath: Array<string>) => {
     const branches = Object.keys(tree);
-    if (branches.length === 0) {
+    // If length is 1, then the only thing there is the index which should be skipped
+    if (branches.length === 1) {
       const leafName = filepath[filepath.length - 1];
       const type = leafName.includes(".") || isNondot(leafName) 
         ? "file" 
@@ -31,21 +32,20 @@ const getPaths = (tree: any) => {
   return paths;
 };
 
-export const buildStructure = (file, options) => {
+export const buildStructure = (file, outputLocation) => {
   if (!validatePath(file, "file")) return;
-  const { directory } = options;
   try {
     const data = fs.readFileSync(file);
     const tree = treeStringToJson(data.toString());
     const paths = getPaths(tree);
 
-    if (!pathExists(directory)) {
-      console.log("Creating target directory:", directory);
-      fs.mkdirSync(directory, { recursive: true });
+    if (!pathExists(outputLocation)) {
+      console.log("Creating target directory:", outputLocation);
+      fs.mkdirSync(outputLocation, { recursive: true });
     }
 
     paths.forEach(({ filepath, type }: any) => {
-      const fullPath = directory + "/" + filepath.replace(/\/+/g, "/");
+      const fullPath = outputLocation + "/" + filepath.replace(/\/+/g, "/");
 
       if (pathExists(fullPath)) {
         console.warn("Path already exists:", fullPath);
@@ -53,16 +53,13 @@ export const buildStructure = (file, options) => {
       }
       
       if (type === "dir") {
-        console.log("Creating directory:", fullPath);
         fs.mkdirSync(fullPath, { recursive: true });
       } else {
         const dirname = path.dirname(fullPath);
         const exist = pathExists(dirname);
         if (!exist) {
-          console.log("Creating directory:", dirname);
           fs.mkdirSync(dirname, { recursive: true });
         }
-        console.log("Creating file:", fullPath);
         fs.writeFileSync(fullPath, "", { flag: "wx" });
       }
     });

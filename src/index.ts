@@ -25,7 +25,7 @@ import { checkConfig } from "./checkConfig";
   
   program
     .argument("[directory]", "directory to build structure from", ".")
-    .option("-o, --output-file <outputFile>", "file to put tree structure in")
+    .option("-o, --output <output>", "location where command output should be stored")
     // TODO: plz fix thx
     // .option("-d, --depth <depth>", "depth to search within the target directory")
     .option("-i, --ignore <ignore>", "ignore these patterns", collect, [])
@@ -42,9 +42,9 @@ import { checkConfig } from "./checkConfig";
   program
     .command("build")
     .argument("<file>", ".tree file to build structure from")
-    .option("-d, --directory <directory>", "output directory to build structure in", ".")
-    .action((file, options) => {
-      buildStructure(file, options);
+    .argument("[output]", "output directory to build structure in", ".")
+    .action((file, output) => {
+      buildStructure(file, output);
     });
   
   program.addHelpText('afterAll', `
