@@ -3,7 +3,7 @@ module.exports = {
   roots: ["<rootDir>/src"],
   testPathIgnorePatterns: ["<rootDir>/src/__tests__/testStructure"],
   testRegex: ".*\\.test\\.ts$",
-  testTimeout: 60000,
+  testTimeout: 15000,
   transform: {
     "^.+\\.ts?$": "ts-jest",
   },

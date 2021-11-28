@@ -8,8 +8,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - name: package
-        run: |
-          npm ci
-          npm test
-          npm run build
+      - name: npm ci
+        run: npm ci
+      - name: npm test
+        run: npm test
+      - name: npm run build
+        run: npm run build
