@@ -3,7 +3,7 @@ import glob from "glob";
 import path from "path";
 import { execSync } from "child_process";
 import { treeJsonToString } from "@structure-codes/utils";
-import { getConfigPath, validatePath } from "./utils";
+import { getConfigPath, validatePath } from "./utils/utils";
 
 const getDefaults = () => {
   const configPath = getConfigPath();

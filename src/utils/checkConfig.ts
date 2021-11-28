@@ -1,8 +1,8 @@
 import inquirer from "inquirer";
 import fs from "fs";
 import { execSync } from "child_process";
-import { defaults } from "./defaults";
-import { SettingsType } from "./settingsType";
+import { defaults } from "../constants/defaults";
+import { SettingsType } from "../types/settingsType";
 import { getConfigPath, validatePath } from "./utils";
 
 const defaultSettingsPrompt = {

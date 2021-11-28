@@ -5,7 +5,7 @@ import { buildStructure } from "./buildStructure";
 import { generateTree } from "./generateTree";
 // @ts-ignore
 import packageJson from "../package.json";
-import { checkConfig } from "./checkConfig";
+import { checkConfig } from "./utils/checkConfig";
 
 
 (async () => {

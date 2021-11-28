@@ -2,7 +2,7 @@ import * as fs from "fs";
 import path from "path";
 import { treeStringToJson } from "@structure-codes/utils";
 import isNondot from "@structure-codes/is-nondot";
-import { pathExists, validatePath } from "./utils";
+import { pathExists, validatePath } from "./utils/utils";
 
 const getPaths = (tree: any) => {
   type Path = {
