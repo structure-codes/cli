@@ -1,21 +1,10 @@
-import { exec } from "child_process";
+import { execSync } from "child_process";
 
-type ReturnType = {
-  code: number;
-  error: Error;
-  stdout: string;
-  stderr: string;
-};
-
-export const cli = (args, cwd): Promise<ReturnType> => {
-  return new Promise((resolve) => {
-    exec(`ts-node src/index ${args.join(" ")}`, { cwd }, (error, stdout, stderr) => {
-      resolve({
-        code: error && error.code ? error.code : 0,
-        error,
-        stdout,
-        stderr,
-      });
-    });
-  });
+export const cli = (args): string => {
+  try {
+    const result = execSync(`ts-node src/index ${args.join(" ")}`);
+    return result.toString();
+  } catch (err) {
+    return err.message;
+  }
 };
