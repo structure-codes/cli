@@ -1,0 +1,23 @@
+├── .editorconfig
+├── .eslintrc.js
+├── .github
+│  └── workflows
+│    ├── ci.yaml
+│    └── release.yaml
+├── .gitignore
+├── .npmignore
+├── .prettierrc
+├── LICENSE
+├── README.md
+└── src
+  ├── buildStructure.ts
+  ├── constants
+  │  └── defaults.ts
+  ├── generateTree.ts
+  ├── index.ts
+  ├── types
+  │  └── settingsType.ts
+  └── utils
+    ├── checkConfig.ts
+    ├── emptyDir
+    └── utils.ts

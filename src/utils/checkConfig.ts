@@ -81,7 +81,7 @@ export const checkConfig = async () => {
       // If not using defaults or editing now, do not create a .treerc file
       return;
     }
-  } catch (error) {
+  } catch (error: any) {
     if (error.isTtyError) {
       // Prompt couldn't be rendered in the current environment
       return console.error(error);

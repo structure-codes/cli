@@ -25,7 +25,7 @@ const globOptions = ({ parentDir, ignored, configIgnore }) => {
 
 export const generateTree = (directory: string, options) => {
   if (!validatePath(directory, "dir")) return;
-  const { silent, json, outputFile, editor, ignore: ignored, configIgnore, dirOnly } = options;
+  const { silent, json, output, editor, ignore: ignored, configIgnore, dirOnly } = options;
   const absolutePath = path.resolve(directory).replace(/\\/g, "/");
   const searchPath = `${absolutePath}/**/*${dirOnly ? "/" : ""}`;
   glob(
@@ -51,9 +51,9 @@ export const generateTree = (directory: string, options) => {
       });
       const treeString = treeJsonToString(tree);
 
-      if (outputFile) {
-        if (!silent) console.info(`Writing data to ${outputFile}`);
-        fs.writeFileSync(outputFile, treeString);
+      if (output) {
+        if (!silent) console.info(`Writing data to ${output}`);
+        fs.writeFileSync(output, treeString);
       }
 
       if (!silent && json) {

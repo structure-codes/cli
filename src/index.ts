@@ -53,7 +53,7 @@ import { checkConfig } from "./utils/checkConfig";
     $ struct -i dist -o new.tree
     
     Build structure from src.tree in directory new-project
-    $ struct build ./src.tree -o new-project
+    $ struct build ./src.tree new-project
   `);
   
   program.parse(process.argv);
