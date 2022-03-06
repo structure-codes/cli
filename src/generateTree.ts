@@ -13,10 +13,10 @@ const getDefaults = () => {
 };
 
 type GlobOptionsProps = {
-  parentDir: string,
-  ignored: string[],
-  configIgnore: boolean,
-}
+  parentDir: string;
+  ignored: string[];
+  configIgnore: boolean;
+};
 
 const globOptions = ({ parentDir, ignored, configIgnore }: GlobOptionsProps) => {
   const config = getDefaults();
@@ -30,14 +30,14 @@ const globOptions = ({ parentDir, ignored, configIgnore }: GlobOptionsProps) => 
 };
 
 type OptionsType = {
-  silent: boolean,
-  json: boolean,
-  output: string,
-  editor: boolean,
-  ignore: string[],
-  configIgnore: boolean,
-  dirOnly: boolean,
-}
+  silent: boolean;
+  json: boolean;
+  output: string;
+  editor: boolean;
+  ignore: string[];
+  configIgnore: boolean;
+  dirOnly: boolean;
+};
 
 export const generateTree = (directory: string, options: OptionsType) => {
   if (!validatePath(directory, "dir")) return;
@@ -55,7 +55,7 @@ export const generateTree = (directory: string, options: OptionsType) => {
         return console.error("No matches found");
       }
       const tree: TreeType[] = [];
-      let index = 0;
+      let _index = 0;
       matches.forEach((match) => {
         const path = match.replace(absolutePath, "");
         const levels = path.split("/");
@@ -65,18 +65,18 @@ export const generateTree = (directory: string, options: OptionsType) => {
           if (!level) return;
 
           // Generate tree json structure
-          const branch = curr.find(leaf => leaf.name === level);
-          if (branch) return curr = branch.children!;
+          const branch = curr.find((leaf) => leaf.name === level);
+          if (branch) return (curr = branch.children);
           curr.push({
             name: level,
             children: [],
-            index,
+            _index,
           });
-          index++;
-          curr = curr[0].children!;
+          _index++;
+          curr = curr[0].children;
         });
       });
-      const treeString = treeJsonToString(tree);
+      const treeString = treeJsonToString({ tree });
 
       if (output) {
         if (!silent) console.info(`Writing data to ${output}`);
