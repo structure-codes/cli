@@ -26,27 +26,29 @@ const overwritePrompt = {
 
 const configExists = (): boolean => {
   const configPath = getConfigPath();
-  return validatePath(configPath, "file");
+  return configPath ? validatePath(configPath, "file") : false;
 };
 
 const createConfig = async (settings: SettingsType): Promise<string | null> => {
   const configPath = getConfigPath();
+  if (!configPath) return Promise.reject("Could not created config");
   try {
     console.info("Writing config file to:", configPath);
     const exists = fs.existsSync(configPath);
     if (exists) {
-      const { overwriteFile } = await inquirer.prompt(overwritePrompt);
+      const { overwriteFile } = await inquirer.prompt([overwritePrompt]);
       if (overwriteFile === "No") {
-        return;
+        return Promise.resolve("done");
       }
     }
     // If file does not exist OR user select to overwrite it, create the file
     fs.writeFileSync(configPath, JSON.stringify(settings, null, 2));
-    return configPath;
+    return Promise.resolve(configPath);
   } catch (err) {
-    console.error("Error creating config file:", configPath);
+    const errMsg = "Error creating config file:" + configPath;
+    console.error(errMsg);
     console.error(err);
-    return;
+    return Promise.reject(errMsg);
   }
 };
 

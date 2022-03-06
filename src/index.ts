@@ -16,7 +16,7 @@ import { checkConfig } from "./utils/checkConfig";
   // - Generate structure or .tree file from existing directory structure
   // - Use .tree file to build directory structure
   
-  const collect = (value, previous) => {
+  const collect = (value: string, previous: string[]) => {
     return previous.concat([value]);
   };
   

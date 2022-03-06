@@ -1,10 +1,10 @@
 import { execSync } from "child_process";
 
-export const cli = (args): string => {
+export const cli = (args: any): string => {
   try {
     const result = execSync(`ts-node src/index ${args.join(" ")}`);
     return result.toString();
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     return err.message;
   }

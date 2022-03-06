@@ -1,42 +1,39 @@
 import * as fs from "fs";
 import path from "path";
-import { treeStringToJson } from "@structure-codes/utils";
+import { TreeType, treeStringToJson } from "@structure-codes/utils";
+// @ts-ignore
 import isNondot from "@structure-codes/is-nondot";
 import { pathExists, validatePath } from "./utils/utils";
 
-const getPaths = (tree: any) => {
-  type Path = {
-    filepath: string;
-    type: "file" | "dir";
-  };
-  const paths: Array<Path> = [];
-  const searchTree = (tree: any, filepath: Array<string>) => {
-    const branches = Object.keys(tree);
-    // If length is 1, then the only thing there is the index which should be skipped
-    if (branches.length === 1) {
-      const leafName = filepath[filepath.length - 1];
-      const type = leafName.includes(".") || isNondot(leafName) 
-        ? "file" 
-        : "dir";
-      const currentPath = filepath.join("/");
+type Path = {
+  filepath: string;
+  type: "file" | "dir";
+};
 
-      return paths.push({ filepath: currentPath, type });
-    }
-    branches.forEach((branch) => {
+const getPaths = (tree: TreeType[]) => {
+  const paths: Array<Path> = [];
+  const searchTree = (tree: TreeType[], filepath: Array<string>) => {
+    tree.forEach((branch) => {
       const newPath = [...filepath];
-      newPath.push(branch);
-      searchTree(tree[branch], newPath);
+      newPath.push(branch.name);
+      if (branch.children && branch.children.length > 0) return searchTree(branch.children, newPath);
+      const type = branch.name.includes(".") || isNondot(branch.name) ? "file" : "dir";
+      return paths.push({ filepath: newPath.join("/"), type });
     });
   };
   searchTree(tree, []);
   return paths;
 };
 
-export const buildStructure = (file, outputLocation) => {
-  if (!validatePath(file, "file")) return;
+export const buildStructure = (file: string, outputLocation: string) => {
+  if (!validatePath(file, "file")) {
+    console.log("Path is INVALID");
+    return;
+  }
   try {
     const data = fs.readFileSync(file);
-    const tree = treeStringToJson(data.toString());
+    const tree: TreeType[] = treeStringToJson(data.toString());
+    console.log("tree is: " + JSON.stringify(tree));
     const paths = getPaths(tree);
 
     if (!pathExists(outputLocation)) {

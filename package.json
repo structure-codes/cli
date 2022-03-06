@@ -24,6 +24,8 @@
   },
   "homepage": "https://github.com/structure-codes/cli#readme",
   "devDependencies": {
+    "@types/glob": "^7.2.0",
+    "@types/inquirer": "^8.2.0",
     "@types/jest": "^27.0.3",
     "@types/node": "^16.11.6",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
@@ -36,7 +38,7 @@
   },
   "dependencies": {
     "@structure-codes/is-nondot": "^1.1.2",
-    "@structure-codes/utils": "^0.0.1",
+    "@structure-codes/utils": "^0.0.2",
     "commander": "^8.3.0",
     "glob": "^7.2.0",
     "inquirer": "^8.2.0"
