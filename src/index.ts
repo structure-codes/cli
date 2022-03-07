@@ -22,7 +22,6 @@ import { checkConfig } from "./utils/checkConfig";
   
   // Check if config already exists, if not attempt to create it
   await checkConfig();
-
   program
     .argument("[directory]", "directory to build structure from", ".")
     .option("-o, --output <output>", "location where command output should be stored")
