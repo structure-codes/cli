@@ -5,7 +5,7 @@ import { buildStructure } from "./buildStructure";
 import { generateTree } from "./generateTree";
 // @ts-ignore
 import packageJson from "../package.json";
-import { checkConfig } from "./checkConfig";
+import { checkConfig } from "./utils/checkConfig";
 
 
 (async () => {
@@ -16,16 +16,15 @@ import { checkConfig } from "./checkConfig";
   // - Generate structure or .tree file from existing directory structure
   // - Use .tree file to build directory structure
   
-  const collect = (value, previous) => {
+  const collect = (value: string, previous: string[]) => {
     return previous.concat([value]);
   };
   
   // Check if config already exists, if not attempt to create it
   await checkConfig();
-  
   program
     .argument("[directory]", "directory to build structure from", ".")
-    .option("-o, --output-file <outputFile>", "file to put tree structure in")
+    .option("-o, --output <output>", "location where command output should be stored")
     // TODO: plz fix thx
     // .option("-d, --depth <depth>", "depth to search within the target directory")
     .option("-i, --ignore <ignore>", "ignore these patterns", collect, [])
@@ -42,9 +41,9 @@ import { checkConfig } from "./checkConfig";
   program
     .command("build")
     .argument("<file>", ".tree file to build structure from")
-    .option("-d, --directory <directory>", "output directory to build structure in", ".")
-    .action((file, options) => {
-      buildStructure(file, options);
+    .argument("[output]", "output directory to build structure in", ".")
+    .action((file, output) => {
+      buildStructure(file, output);
     });
   
   program.addHelpText('afterAll', `
@@ -53,7 +52,7 @@ import { checkConfig } from "./checkConfig";
     $ struct -i dist -o new.tree
     
     Build structure from src.tree in directory new-project
-    $ struct build ./src.tree -o new-project
+    $ struct build ./src.tree new-project
   `);
   
   program.parse(process.argv);

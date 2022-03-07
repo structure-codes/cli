@@ -8,8 +8,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - name: package
+      - name: set default config
         run: |
-          npm ci
-          npm test
-          npm run build
+          echo '{
+            "ignored": [
+              ".git",
+              "node_modules"
+            ]
+          }' > $HOME/.treerc
+      - name: npm ci
+        run: npm ci
+      - name: npm test
+        run: npm test
+      - name: npm run build
+        run: npm run build

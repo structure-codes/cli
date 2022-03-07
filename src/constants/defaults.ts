@@ -1,4 +1,4 @@
-import { SettingsType } from "./settingsType";
+import { SettingsType } from "../types/settingsType";
 
 export const defaults: SettingsType = {
   ignored: [

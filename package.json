@@ -1,6 +1,6 @@
 {
   "name": "@structure-codes/cli",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "cli tool for generating directory structure from a .tree file",
   "bin": {
     "struct": "dist/index.js"
@@ -8,6 +8,7 @@
   "scripts": {
     "lint": "eslint . --ext .ts,.tsx",
     "build": "tsc",
+    "test": "jest",
     "dev": "tsc -watch -p ."
   },
   "engines": {
@@ -23,14 +24,21 @@
   },
   "homepage": "https://github.com/structure-codes/cli#readme",
   "devDependencies": {
+    "@types/glob": "^7.2.0",
+    "@types/inquirer": "^8.2.0",
+    "@types/jest": "^27.0.3",
     "@types/node": "^16.11.6",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
     "@typescript-eslint/parser": "^5.2.0",
     "eslint": "^8.1.0",
+    "jest": "^27.3.1",
+    "ts-jest": "^27.0.7",
+    "ts-node": "^10.4.0",
     "typescript": "^4.4.4"
   },
   "dependencies": {
     "@structure-codes/is-nondot": "^1.1.2",
+    "@structure-codes/utils": "^0.0.3",
     "commander": "^8.3.0",
     "glob": "^7.2.0",
     "inquirer": "^8.2.0"

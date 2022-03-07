@@ -1,51 +1,48 @@
 import * as fs from "fs";
 import path from "path";
-import { treeStringToJson } from "./tree";
+import { TreeType, treeStringToJson } from "@structure-codes/utils";
+// @ts-ignore
 import isNondot from "@structure-codes/is-nondot";
-import { pathExists, validatePath } from "./utils";
+import { pathExists, validatePath } from "./utils/utils";
 
-const getPaths = (tree: any) => {
-  type Path = {
-    filepath: string;
-    type: "file" | "dir";
-  };
+type Path = {
+  filepath: string;
+  type: "file" | "dir";
+};
+
+const getPaths = (tree: TreeType[]) => {
   const paths: Array<Path> = [];
-  const searchTree = (tree: any, filepath: Array<string>) => {
-    const branches = Object.keys(tree);
-    if (branches.length === 0) {
-      const leafName = filepath[filepath.length - 1];
-      const type = leafName.includes(".") || isNondot(leafName) 
-        ? "file" 
-        : "dir";
-      const currentPath = filepath.join("/");
-
-      return paths.push({ filepath: currentPath, type });
-    }
-    branches.forEach((branch) => {
+  const searchTree = (tree: TreeType[], filepath: Array<string>) => {
+    tree.forEach((branch) => {
       const newPath = [...filepath];
-      newPath.push(branch);
-      searchTree(tree[branch], newPath);
+      newPath.push(branch.name);
+      if (branch.children && branch.children.length > 0) return searchTree(branch.children, newPath);
+      const type = branch.name.includes(".") || isNondot(branch.name) ? "file" : "dir";
+      return paths.push({ filepath: newPath.join("/"), type });
     });
   };
   searchTree(tree, []);
   return paths;
 };
 
-export const buildStructure = (file, options) => {
-  if (!validatePath(file, "file")) return;
-  const { directory } = options;
+export const buildStructure = (file: string, outputLocation: string) => {
+  if (!validatePath(file, "file")) {
+    console.log("Path is INVALID");
+    return;
+  }
   try {
     const data = fs.readFileSync(file);
-    const tree = treeStringToJson(data.toString());
+    const tree: TreeType[] = treeStringToJson(data.toString());
+    console.log("tree is: " + JSON.stringify(tree));
     const paths = getPaths(tree);
 
-    if (!pathExists(directory)) {
-      console.log("Creating target directory:", directory);
-      fs.mkdirSync(directory, { recursive: true });
+    if (!pathExists(outputLocation)) {
+      console.log("Creating target directory:", outputLocation);
+      fs.mkdirSync(outputLocation, { recursive: true });
     }
 
     paths.forEach(({ filepath, type }: any) => {
-      const fullPath = directory + "/" + filepath.replace(/\/+/g, "/");
+      const fullPath = outputLocation + "/" + filepath.replace(/\/+/g, "/");
 
       if (pathExists(fullPath)) {
         console.warn("Path already exists:", fullPath);
@@ -53,16 +50,13 @@ export const buildStructure = (file, options) => {
       }
       
       if (type === "dir") {
-        console.log("Creating directory:", fullPath);
         fs.mkdirSync(fullPath, { recursive: true });
       } else {
         const dirname = path.dirname(fullPath);
         const exist = pathExists(dirname);
         if (!exist) {
-          console.log("Creating directory:", dirname);
           fs.mkdirSync(dirname, { recursive: true });
         }
-        console.log("Creating file:", fullPath);
         fs.writeFileSync(fullPath, "", { flag: "wx" });
       }
     });

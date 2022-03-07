@@ -17,7 +17,6 @@ export const pathExists = (filepath: string) => {
     fs.accessSync(filepath);
     return true;
   } catch {
-    console.error("Path does not exist:", filepath);
     return false;
   }
 };

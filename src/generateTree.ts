@@ -2,17 +2,28 @@ import * as fs from "fs";
 import glob from "glob";
 import path from "path";
 import { execSync } from "child_process";
-import { treeJsonToString } from "./tree";
-import { getConfigPath, validatePath } from "./utils";
+import { TreeType, treeJsonToString } from "@structure-codes/utils";
+import { getConfigPath, validatePath } from "./utils/utils";
 
 const getDefaults = () => {
   const configPath = getConfigPath();
   if (!configPath) return [];
-  const config = fs.readFileSync(configPath).toString();
-  return JSON.parse(config);
+  try {
+    const config = fs.readFileSync(configPath).toString();
+    return JSON.parse(config);
+  } catch (err) {
+    console.warn("Could not find config file at:" + configPath);
+    return [];
+  }
 };
 
-const globOptions = ({ parentDir, ignored, configIgnore }) => {
+type GlobOptionsProps = {
+  parentDir: string;
+  ignored: string[];
+  configIgnore: boolean;
+};
+
+const globOptions = ({ parentDir, ignored, configIgnore }: GlobOptionsProps) => {
   const config = getDefaults();
   const defaultIgnore = configIgnore ? [] : config.ignored;
   const mergedIgnore = [...ignored, ...defaultIgnore].map((path) => `${parentDir}/**/${path}/**`);
@@ -23,9 +34,19 @@ const globOptions = ({ parentDir, ignored, configIgnore }) => {
   };
 };
 
-export const generateTree = (directory: string, options) => {
+type OptionsType = {
+  silent: boolean;
+  json: boolean;
+  output: string;
+  editor: boolean;
+  ignore: string[];
+  configIgnore: boolean;
+  dirOnly: boolean;
+};
+
+export const generateTree = (directory: string, options: OptionsType) => {
   if (!validatePath(directory, "dir")) return;
-  const { silent, json, outputFile, editor, ignore: ignored, configIgnore, dirOnly } = options;
+  const { silent, json, output, editor, ignore: ignored, configIgnore, dirOnly } = options;
   const absolutePath = path.resolve(directory).replace(/\\/g, "/");
   const searchPath = `${absolutePath}/**/*${dirOnly ? "/" : ""}`;
   glob(
@@ -33,27 +54,38 @@ export const generateTree = (directory: string, options) => {
     globOptions({ parentDir: absolutePath, ignored, configIgnore }),
     (err, matches) => {
       if (err) {
-        return console.error(`Error searching for files in ${err.path}`);
+        return console.error(`Error searching for files in ${absolutePath}`);
       }
       if (!matches) {
         return console.error("No matches found");
       }
-      const tree = {};
+      const tree: TreeType[] = [];
+      let _index = 0;
       matches.forEach((match) => {
         const path = match.replace(absolutePath, "");
         const levels = path.split("/");
-        let curr = tree;
+        let curr: TreeType[] = tree;
         levels.forEach((level) => {
+          // Avoid empty strings
           if (!level) return;
-          if (!curr[level]) curr[level] = {};
-          curr = curr[level];
+
+          // Generate tree json structure
+          const branch = curr.find((leaf) => leaf.name === level);
+          if (branch) return (curr = branch.children);
+          curr.push({
+            name: level,
+            children: [],
+            _index,
+          });
+          _index++;
+          curr = curr[0].children;
         });
       });
-      const treeString = treeJsonToString(tree);
+      const treeString = treeJsonToString({ tree });
 
-      if (outputFile) {
-        if (!silent) console.info(`Writing data to ${outputFile}`);
-        fs.writeFileSync(outputFile, treeString);
+      if (output) {
+        if (!silent) console.info(`Writing data to ${output}`);
+        fs.writeFileSync(output, treeString);
       }
 
       if (!silent && json) {
