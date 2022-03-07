@@ -21,7 +21,7 @@ import { checkConfig } from "./utils/checkConfig";
   };
   
   // Check if config already exists, if not attempt to create it
-  // await checkConfig();
+  await checkConfig();
 
   program
     .argument("[directory]", "directory to build structure from", ".")
