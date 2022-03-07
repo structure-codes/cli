@@ -8,8 +8,13 @@ import { getConfigPath, validatePath } from "./utils/utils";
 const getDefaults = () => {
   const configPath = getConfigPath();
   if (!configPath) return [];
-  const config = fs.readFileSync(configPath).toString();
-  return JSON.parse(config);
+  try {
+    const config = fs.readFileSync(configPath).toString();
+    return JSON.parse(config);
+  } catch (err) {
+    console.warn("Could not find config file at:" + configPath);
+    return [];
+  }
 };
 
 type GlobOptionsProps = {
