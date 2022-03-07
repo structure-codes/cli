@@ -4,7 +4,7 @@ import { cli } from "./cli";
 const tmpBase = process.platform === "win32" ? process.env.TEMP : "/tmp";
 const tmpDir = `tree_${Date.now()}`;
 const tmpPath = tmpBase + "/" + tmpDir;
-const buildTree = "src/__tests__/trees/buildTest.tree";
+const buildTree = "../src/__tests__/trees/buildTest.tree";
 
 test("Should be able to build structure from given tree file", () => {
   cli(["build", buildTree, tmpPath]);
